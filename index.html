@@ -229,15 +229,6 @@ header{z-index:9}
 .lightbox img{max-width:min(1100px,100%);max-height:100%;border-radius:12px;box-shadow:0 0 0 1px var(--accent),0 30px 120px -20px rgba(168,85,247,.6)}
 .lb-close{position:absolute;top:max(16px,env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:1.1rem;cursor:pointer}
 .lb-close:hover{border-color:var(--accent)}
-.cv-modal{position:fixed;inset:0;z-index:50;background:rgba(7,6,11,.92);backdrop-filter:blur(8px);overflow-y:auto;overscroll-behavior:contain;animation:fade .25s both}
-.cv-bar{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:max(12px,env(safe-area-inset-top,0px)) 16px 12px;background:color-mix(in srgb,var(--bg) 90%,transparent);border-bottom:1px solid var(--line)}
-.cv-bar b{font:700 .95rem var(--font-display)}
-.cv-bar div{display:flex;gap:10px;align-items:center}
-.cv-bar .btn{padding:8px 14px;font-size:.88rem}
-.cv-bar .lb-close{position:static;width:40px;height:40px}
-.cv-pages{display:grid;gap:20px;justify-items:center;padding:24px 16px 48px}
-.cv-pages img{width:min(820px,100%);height:auto;display:block;background:#fff;border-radius:8px;box-shadow:0 0 0 1px var(--accent),0 30px 100px -30px rgba(168,85,247,.6)}
-.cv-msg{color:var(--muted);font-size:.85rem;text-align:center}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 
 .reveal{transition:transform .7s cubic-bezier(.2,.7,.2,1)}
@@ -270,7 +261,6 @@ header{z-index:9}
       <li><a href="#habilidades">Habilidades</a></li>
       <li><a href="#formacao">Formação</a></li>
       <li><a href="#certificados">Certificados</a></li>
-      <li><a href="#curriculo" data-cv-open>Currículo</a></li>
     </ul>
     <a class="btn mag" href="#contato">Contato</a>
   </nav>
@@ -287,7 +277,6 @@ header{z-index:9}
         <div class="actions">
           <a class="btn mag" href="#projetos">Ver projetos</a>
           <a class="btn ghost mag" href="https://github.com/deividazevedo292-coder" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-gh"/></svg>GitHub</a>
-          <a class="btn ghost mag" href="#curriculo" data-cv-open><svg aria-hidden="true"><use href="#i-dl"/></svg>Currículo</a>
         </div>
       </div>
       <div class="visual">
@@ -516,30 +505,11 @@ header{z-index:9}
           <svg aria-hidden="true"><use href="#i-gh"/></svg>
           <div><small>GitHub</small><b>deividazevedo292-coder</b></div>
         </a>
-        <div class="link">
-          <svg aria-hidden="true"><use href="#i-dl"/></svg>
-          <div><small>Currículo</small><b>PDF · 1 página</b></div>
-          <a class="copy" href="#curriculo" data-cv-open>Ver</a>
-          <a class="copy" href="#curriculo" data-cv-dl>Baixar</a>
-        </div>
       </div>
     </div>
   </section>
 </main>
 
-<div class="cv-modal" id="curriculo" hidden role="dialog" aria-modal="true" aria-label="Currículo de Deivid Azevedo Dantas">
-  <div class="cv-bar">
-    <b>Currículo</b>
-    <div>
-      <button class="btn mag" type="button" data-cv-dl><svg aria-hidden="true"><use href="#i-dl"/></svg>Baixar PDF</button>
-      <button class="lb-close" id="cv-close" type="button" aria-label="Fechar">✕</button>
-    </div>
-  </div>
-  <div class="cv-pages">
-    <img src="cv-pagina-1.png" alt="Currículo de Deivid Azevedo Dantas" width="1076" height="1522" loading="lazy">
-    <p class="cv-msg" id="cv-msg" hidden></p>
-  </div>
-</div>
 
 <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Certificado ampliado">
   <button class="lb-close" id="lb-close" type="button" aria-label="Fechar">✕</button>
@@ -676,39 +646,5 @@ if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: re
 </script>
 
 
-<script>
-/* Currículo: abre dentro da página (o visualizador bloqueia abrir o PDF em nova aba); o download usa a capability "downloads" */
-(function(){
-  var FILE="curriculo-deivid-azevedo-dantas.pdf", NAME="Curriculo-Deivid-Azevedo-Dantas.pdf", dl=null;
-  var modal=document.getElementById("curriculo"), msg=document.getElementById("cv-msg"), last=null;
-  try{ if(window.claude&&claude.use){ claude.use("downloads").then(function(d){dl=d;}).catch(function(){}); } }catch(e){}
-  function abrir(ev){ if(ev) ev.preventDefault(); last=document.activeElement; modal.hidden=false; document.body.style.overflow="hidden"; document.getElementById("cv-close").focus(); }
-  function fechar(){ modal.hidden=true; document.body.style.overflow=""; msg.hidden=true; if(last&&last.focus) last.focus(); }
-  function aviso(t){ msg.textContent=t; msg.hidden=false; }
-  document.querySelectorAll("[data-cv-open]").forEach(function(a){ a.addEventListener("click",abrir); });
-  document.getElementById("cv-close").addEventListener("click",fechar);
-  modal.addEventListener("click",function(e){ if(e.target===modal||e.target.classList.contains("cv-pages")) fechar(); });
-  document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!modal.hidden) fechar(); });
-  document.querySelectorAll("[data-cv-dl]").forEach(function(b){
-    b.addEventListener("click",function(ev){
-      ev.preventDefault();
-      if(modal.hidden) abrir();
-      if(!dl){
-        if(!window.claude){ /* fora do Claude (ex.: GitHub Pages): download normal */
-          var l=document.createElement("a"); l.href=FILE; l.download=NAME; document.body.appendChild(l); l.click(); l.remove(); return;
-        }
-        aviso("O download não está disponível nesta visualização, mas o currículo completo está aqui acima."); return;
-      }
-      fetch(FILE).then(function(r){ if(!r.ok) throw {code:"fetch"}; return r.blob(); })
-        .then(function(blob){ return dl.save({filename:NAME,data:blob}); })
-        .catch(function(err){
-          var c=err&&err.code;
-          if(c==="declined") return;
-          if(c==="rate_limited") return aviso("Já tem um download aguardando confirmação.");
-          aviso("Não foi possível baixar agora, mas o currículo completo está aqui acima.");
-        });
-    });
-  });
-})();
-</script>
+
 </body></html>
